@@ -156,6 +156,29 @@ id, createdAt, updatedAt, date, 사진 url/name은 서버가 생성합니다.
 추후 HTTPS를 설정한 뒤 `VODA_HTTPS=1`로 Secure 쿠키를 활성화하고, 영구 DB 저장 공간·백업·프록시의 업로드 용량 제한을 설정하세요.
 `VODA_DATA_DIR`로 데이터 폴더를 변경할 수 있습니다. 여러 서버로 확장할 경우 외부 DB와 파일 저장소로 전환하세요.
 
+### Ubuntu 전용 서버에서 자동 실행과 HTTPS 설정
+
+새 Ubuntu 24.04 서버에서 `git`, `python3-venv`, `python3-pip`, `caddy`를 설치하고 이 저장소를 내려받습니다.
+서버 안에서 가상환경과 requirements.txt를 설치한 후 `.venv/bin/python manage.py create-admin`으로 관리자를 만드세요.
+도메인을 서버 IP에 연결하고 방화벽에서 TCP 80/443을 허용한 뒤, 저장소 폴더에서 실행합니다.
+
+```bash
+bash deploy/enable-server.sh your-domain.example
+```
+
+`your-domain.example`은 본인 도메인으로 바꾸세요. 이 스크립트는 VODA만 운영하는 서버를 위한 것으로, 기존 Caddy 설정을 백업한 뒤 교체합니다.
+일반 SSH 사용자로 실행하며 시스템 설정에 필요한 단계에서 sudo를 사용합니다.
+기존 data 폴더를 유지하고, HTTPS 쿠키와 로컬 프록시 신뢰 설정을 적용합니다.
+Caddy는 인증서 발급/갱신과 HTTP → HTTPS 전환을 담당합니다. 서비스 시작 성공과 인증서 발급 완료는 별도이므로 실제 HTTPS 접속을 확인하세요.
+
+```bash
+sudo systemctl status voda caddy --no-pager
+sudo journalctl -u voda -n 40 --no-pager
+sudo journalctl -u caddy -n 40 --no-pager
+```
+
+이후 코드를 갱신하기 전에는 `manage.py backup`으로 DB를 별도 백업하세요. 현재 서버의 data 폴더는 Git에 포함되지 않습니다.
+
 ### 이번 구현에서 확인한 결과
 
 - Windows 11 / Python 3.12.10: `test.bat` 및 pytest API 테스트 **4개 통과**.
