@@ -6,6 +6,8 @@ Python FastAPI + SQLite + HTML/CSS/바닐라 JavaScript로 구성되어 있습�
 저장소를 내려받아 본인 컴퓨터에서 실행할 수 있습니다. GitHub 계정이나 Codex는 실행에 필요하지 않습니다.
 설치한 컴퓨터마다 독립된 DB와 관리자 계정을 사용하며, 처음에는 게시글과 업로드 사진이 비어 있습니다.
 
+**[소스 ZIP 다운로드](https://github.com/aigtrtr2222/VODA/archive/refs/heads/main.zip)** · [저장소](https://github.com/aigtrtr2222/VODA)
+
 ## 가장 빠른 실행
 
 Python 3.11 이상이 필요합니다. Windows 11 + Python 3.12.10에서 검증했습니다.
