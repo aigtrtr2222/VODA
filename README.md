@@ -8,6 +8,8 @@ Python FastAPI + SQLite + HTML/CSS/바닐라 JavaScript로 구성되어 있습�
 
 **[소스 ZIP 다운로드](https://github.com/aigtrtr2222/VODA/archive/refs/heads/main.zip)** · [저장소](https://github.com/aigtrtr2222/VODA)
 
+운영 사이트: **https://voda-run.duckdns.org**
+
 ## 가장 빠른 실행
 
 Python 3.11 이상이 필요합니다. Windows 11 + Python 3.12.10에서 검증했습니다.
@@ -151,8 +153,8 @@ id, createdAt, updatedAt, date, 사진 url/name은 서버가 생성합니다.
 
 ## 나중에 배포할 때
 
-지금은 로컬 구축 버전입니다. 무료 도메인 발급과 외부 서버 배포는 아직 하지 않았습니다.
-기본 실행은 내 컴퓨터에서만 접속 가능한 127.0.0.1 주소입니다.
+제공되는 `start.bat`과 `run.py`의 기본 실행은 내 컴퓨터에서만 접속 가능한 127.0.0.1 주소입니다.
+현재 운영 사이트는 Google Cloud VM에 별도로 설치하여 Duck DNS와 Caddy HTTPS로 제공하고 있습니다.
 추후 HTTPS를 설정한 뒤 `VODA_HTTPS=1`로 Secure 쿠키를 활성화하고, 영구 DB 저장 공간·백업·프록시의 업로드 용량 제한을 설정하세요.
 `VODA_DATA_DIR`로 데이터 폴더를 변경할 수 있습니다. 여러 서버로 확장할 경우 외부 DB와 파일 저장소로 전환하세요.
 
