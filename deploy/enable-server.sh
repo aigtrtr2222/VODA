@@ -98,5 +98,5 @@ sudo systemctl restart caddy.service
 sudo systemctl is-active voda.service caddy.service
 echo "Services started. Caddy is obtaining the HTTPS certificate."
 echo "Website: https://$site"
-echo "Admin: https://$site/admin.html"
+echo "Admin: https://$site/admin"
 echo 'If HTTPS is not ready, check: sudo journalctl -u caddy -n 40 --no-pager'

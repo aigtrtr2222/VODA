@@ -8,7 +8,7 @@ from zoneinfo import ZoneInfo
 import hashlib, hmac, io, json, os, secrets, sqlite3, time, warnings
 from uuid import uuid4
 from fastapi import FastAPI, Depends, HTTPException, Request, Response, UploadFile, File, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -265,13 +265,23 @@ def health():
 # Serve explicit frontend files only. Never expose server code, DB, or .git.
 app.mount('/images', StaticFiles(directory=ROOT / 'images'), name='images')
 (ROOT / 'analysis').mkdir(exist_ok=True)
+@app.get('/analysis/index.html')
+def analysis_index(request: Request):
+    return RedirectResponse('/analysis/' + ('?' + request.url.query if request.url.query else ''), status_code=308)
+
 app.mount('/analysis', StaticFiles(directory=ROOT / 'analysis', html=True), name='analysis')
 PUBLIC = {p.name for p in ROOT.iterdir() if p.suffix in ('.html', '.css', '.js')}
+PAGES = {Path(name).stem: name for name in PUBLIC if name.endswith('.html')}
 @app.get('/')
 def index():
     return FileResponse(ROOT / 'index.html')
 @app.get('/{filename}')
-def frontend(filename: str):
+def frontend(filename: str, request: Request):
+    if filename in PUBLIC and filename.endswith('.html'):
+        target = '/' if filename == 'index.html' else '/' + Path(filename).stem
+        return RedirectResponse(target + ('?' + request.url.query if request.url.query else ''), status_code=308)
+    if filename in PAGES:
+        return FileResponse(ROOT / PAGES[filename])
     if filename not in PUBLIC:
         raise HTTPException(404)
     return FileResponse(ROOT / filename)

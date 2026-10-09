@@ -86,7 +86,7 @@ def main():
                 def new():
                     admin.locator('#new-button').click()
 
-                admin.goto(base + '/admin.html')
+                admin.goto(base + '/admin')
                 admin.locator('#login-form [name=username]').fill('browser-test')
                 admin.locator('#login-form [name=password]').fill('wrong-password')
                 admin.locator('#login-form button').click()
@@ -113,7 +113,7 @@ def main():
                     if number < 3:
                         admin.locator('[name=pinned]').check()
                     save(f'페이지 테스트 {number}', '목록 본문')
-                visit('/board.html')
+                visit('/board')
                 expect(visitor.locator('#voda-board-posts .board-post-item')).to_have_count(6)
                 expect(visitor.locator('#voda-board-pinned a')).to_have_count(2)
                 visitor.locator('#voda-board-pagination button').filter(has_text='2').click()
@@ -130,7 +130,7 @@ def main():
                 expect(admin.locator('#admin-message')).to_have_text('삭제했습니다.')
                 visit('/')
                 expect(visitor.locator('#home-posts')).not_to_contain_text('수정 공지')
-                visit('/board.html')
+                visit('/board')
                 expect(visitor.locator('#voda-board-posts')).not_to_contain_text('수정 공지')
                 print('PASS: board CRUD, home/detail, categories/search/pagination/pinned')
 
@@ -151,7 +151,7 @@ def main():
                 admin.locator('[data-tab=activities]').click()
                 admin.locator('#admin-list button').filter(has_text='활동 검증').click()
                 assert admin.locator('#image-preview img').nth(1).get_attribute('src') == original
-                visit('/activities.html')
+                visit('/activities')
                 expect(visitor.locator('.activity-slide')).to_have_count(2)
                 expect(visitor.locator('.activity-slide').first).to_be_visible()
                 visitor.locator('.activity-next').click()
@@ -164,7 +164,7 @@ def main():
                 admin.locator('[name=link]').fill('https://example.org/')
                 admin.locator('#image-input').set_input_files(files[:1])
                 save('프로젝트 검증', '프로젝트 설명')
-                visit('/projects.html')
+                visit('/projects')
                 expect(visitor.locator('.project-entry')).to_contain_text('프로젝트 검증')
                 expect(visitor.locator('.project-category')).to_have_text('데이터 분석')
                 expect(visitor.locator('.managed-project-link')).to_have_attribute('href', 'https://example.org/')
@@ -196,7 +196,7 @@ def main():
                 visitor_context.route('https://fonts.googleapis.com/**', lambda route: route.abort())
                 visitor_context.route('https://fonts.gstatic.com/**', lambda route: route.abort())
                 visitor_context.route('https://cdnjs.cloudflare.com/**', lambda route: route.abort())
-                visit('/analysis/index.html')
+                visit('/analysis/')
                 expect(visitor.locator('#net canvas')).to_be_visible()
                 visitor.set_viewport_size({'width': 390, 'height': 844})
                 expect(visitor.locator('#panel')).to_be_hidden()
@@ -205,7 +205,7 @@ def main():
                 visitor.set_viewport_size({'width': 1280, 'height': 720})
                 print('PASS: photos/projects, embedded analysis search/timeline/relations, standalone/mobile/offline dependencies')
 
-                for path in ['/', '/about.html', '/activities.html', '/projects.html', '/board.html', '/apply.html']:
+                for path in ['/', '/about', '/activities', '/projects', '/board', '/apply']:
                     visit(path)
                     visitor.locator('img').evaluate_all("imgs => imgs.forEach(img => img.loading = 'eager')")
                     visitor.wait_for_function('Array.from(document.images).every(img => img.complete)')
@@ -226,12 +226,12 @@ def main():
                 assert denied.status == 401
                 stop()
                 start()
-                visit('/activities.html')
+                visit('/activities')
                 expect(visitor.locator('.activity-row')).to_contain_text('활동 검증')
                 assert visitor.locator('.activity-slide img').first.evaluate('img => img.complete && img.naturalWidth > 0')
-                visit('/board.html')
+                visit('/board')
                 expect(visitor.locator('#voda-board-posts')).to_contain_text('페이지 테스트')
-                visit('/projects.html')
+                visit('/projects')
                 expect(visitor.locator('.project-entry')).to_contain_text('프로젝트 검증')
                 assert not page_errors, page_errors
                 assert not bad_responses, bad_responses

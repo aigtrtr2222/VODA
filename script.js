@@ -26,12 +26,12 @@
 
   // 메뉴를 추가하거나 순서를 바꿀 때 이 배열을 수정하세요.
   const NAV_ITEMS = [
-    ["index.html", "Home"],
-    ["about.html", "About"],
-    ["activities.html", "Activities"],
-    ["projects.html", "Projects"],
-    ["board.html", "Board"],
-    ["apply.html", "Apply"]
+    ["/", "Home"],
+    ["about", "About"],
+    ["activities", "Activities"],
+    ["projects", "Projects"],
+    ["board", "Board"],
+    ["apply", "Apply"]
   ];
 
   const CATEGORY_LABELS = {
@@ -73,13 +73,13 @@
     const footer = document.querySelector("#site-footer");
 
     const currentPage =
-      location.pathname.split("/").pop() || "index.html";
+      location.pathname.split("/").pop() || "/";
 
     if (header) {
       // 아래 HTML에는 고정된 메뉴·브랜드 정보만 들어갑니다.
       header.innerHTML = `
         <div class="wrap header-inner">
-          <a class="logo" href="index.html" aria-label="VODA 홈">
+          <a class="logo" href="/" aria-label="VODA 홈">
             <img src="images/logo.png" alt="VODA">
           </a>
 
@@ -152,11 +152,11 @@
     if (footer) {
       footer.innerHTML = `
         <div class="wrap footer-inner">
-          <a class="logo" href="index.html" aria-label="VODA 홈">
+          <a class="logo" href="/" aria-label="VODA 홈">
             <img src="images/logo.png" alt="VODA">
           </a>
           <span>Value-Oriented Data Analysis</span>
-          <a href="admin.html">관리자</a>
+          <a href="admin">관리자</a>
         </div>
       `;
     }
@@ -199,7 +199,7 @@
           `[${categoryLabel(post.category)}] ${post.title}`
         );
 
-        link.href = `board.html?id=${encodeURIComponent(post.id)}`;
+        link.href = `board?id=${encodeURIComponent(post.id)}`;
 
         const date = createElement("time", "post-date", post.date);
 

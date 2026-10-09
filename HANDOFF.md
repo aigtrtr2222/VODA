@@ -1,5 +1,13 @@
 # VODA 노트북 Codex 인수인계
 
+## 최신 변경: 2026-10-09 확장자 없는 페이지 주소
+
+- `/about`, `/activities`, `/projects`, `/board`, `/apply`, `/admin`에서 기존 화면 제공. 홈은 `/`, 관계망은 `/analysis/`.
+- 기존 `.html` URL은 308 리디렉션하며 게시글 id 등 쿼리를 보존. 메뉴/홈 공지/관리자/관계망 링크 및 실행 안내도 변경.
+- 허용된 HTML 파일에만 경로를 추가하여 DB·서버 코드 비공개 유지. 분석 데이터와 운영 DB는 변경하지 않음.
+- 임시 DB pytest 5개 통과. 실제 Chrome에서 확장자 없는 URL로 전체 브라우저 검사 통과: 게시판 CRUD/홈 연동/사진/프로젝트/관계망/모바일/로그아웃 권한/서버 재시작 후 데이터 보존. 예상 밖 HTTP 및 JavaScript 오류 없음.
+- GitHub 변경을 VM에 반영할 때 `cd ~/VODA && git pull --ff-only && sudo systemctl restart voda` 필요. 서버 코드 변경이므로 이번 업데이트는 재시작 필수. 운영 반영은 사용자 SSH 실행 후 확인 필요.
+
 ## 목표와 배경
 
 VODA 동아리 소개 사이트의 기존 프론트에 백엔드를 붙이는 작업이다.

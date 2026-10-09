@@ -72,3 +72,19 @@ def test_static_navigation_and_login_rate_limit():
     for _ in range(10):
         assert client.post('/api/auth/login',json={'username':'invalid','password':'wrong'},headers=HEADERS).status_code == 401
     assert client.post('/api/auth/login',json={'username':'invalid','password':'wrong'},headers=HEADERS).status_code == 429
+
+def test_clean_page_urls_and_legacy_redirects():
+    client = TestClient(app)
+    for name in ['about', 'activities', 'projects', 'board', 'apply', 'admin']:
+        assert client.get('/' + name).status_code == 200
+        response = client.get('/' + name + '.html?id=a%2Fb&x=1', follow_redirects=False)
+        assert response.status_code == 308
+        assert response.headers['location'] == '/' + name + '?id=a%2Fb&x=1'
+    for old, new in [('/index.html', '/'), ('/analysis/index.html', '/analysis/')]:
+        response = client.get(old, follow_redirects=False)
+        assert response.status_code == 308
+        assert response.headers['location'] == new
+        assert client.get(new).status_code == 200
+    assert client.get('/analysis/vis-network.min.js').status_code == 200
+    for path in ['/server', '/data/voda', '/missing', '/missing.html']:
+        assert client.get(path).status_code == 404

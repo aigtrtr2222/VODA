@@ -23,5 +23,5 @@ if __name__ == '__main__':
                 print(error)
     host = os.environ.get('VODA_HOST', '127.0.0.1')
     port = int(os.environ.get('VODA_PORT', '8000'))
-    print(f'\n홈페이지: http://127.0.0.1:{port}\n관리자: http://127.0.0.1:{port}/admin.html\n종료: Ctrl+C\n')
+    print(f'\n홈페이지: http://127.0.0.1:{port}\n관리자: http://127.0.0.1:{port}/admin\n종료: Ctrl+C\n')
     uvicorn.run('server:app', host=host, port=port)
