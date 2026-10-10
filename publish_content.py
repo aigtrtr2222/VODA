@@ -39,9 +39,10 @@ POSTS = [
 ]
 
 
-def publish():
+def publish(posts=None):
+    posts = POSTS if posts is None else posts
     # Validate before taking a backup or writing any records.
-    validated = [(kind, 'voda-20261010-' + key, Content(**value)) for kind, key, value in POSTS]
+    validated = [(kind, 'voda-20261010-' + key, Content(**value)) for kind, key, value in posts]
     backup = DATA / ('before-approved-posts-' + uuid4().hex + '.sqlite3')
     subprocess.run([sys.executable, str(ROOT / 'manage.py'), 'backup', '--output', str(backup)], check=True)
     inserted = 0
@@ -59,11 +60,13 @@ def publish():
             if kind == 'board':
                 item.update(content=body.content, category=body.category, pinned=False,
                             date=datetime.now(ZoneInfo('Asia/Seoul')).strftime('%Y.%m.%d'))
-            else:
+            elif kind == 'projects':
                 item.update(description=body.description, projectCategory=body.projectCategory, link=body.link, photos=[])
+            else:
+                item.update(description=body.description, photos=[])
             conn.execute('INSERT INTO items VALUES(?,?,?,?)', (item_id, kind, json.dumps(item, ensure_ascii=False), now))
             inserted += 1
-    print(f'Published {inserted}; skipped {len(POSTS) - inserted}. Existing content preserved.')
+    print(f'Published {inserted}; skipped {len(posts) - inserted}. Existing content preserved.')
 
 
 if __name__ == '__main__':
