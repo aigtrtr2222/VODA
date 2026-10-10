@@ -1,5 +1,12 @@
 # VODA 노트북 Codex 인수인계
 
+## 최신 변경: 2026-10-10 불필요한 안내 문구 제거
+
+- 사용자 요청으로 Activities 소개의 '이 글은…아닙니다' 문구 3종과 'Projects에서 관계망을…읽어보세요' 문장을 제거. 활동/프로젝트의 AI 생성 일러스트 화면 캡션도 제거했으며 이미지 및 생성 기록은 유지.
+- cleanup_activity_copy.py는 실행 전 DB를 백업하고 해당 문장만 제거한다. 본문 전체 덮어쓰기 없이 이미지/제목/작성일 보존, updatedAt만 갱신. publish_activities.py로 새로 등록하는 글에도 동일 정리 적용.
+- 임시 DB 검증: 해당 문장 삭제, 첨부 이미지/작성일 보존, 반복 실행 시 변경 없음, 신규 등록 본문에 해당 문구 없음 통과.
+- GitHub 갱신 후 서버에서 `cd ~/VODA && git pull --ff-only && .venv/bin/python cleanup_activity_copy.py` 실행 필요. 운영 DB 수정은 사용자 SSH 실행 대기. content.js URL 버전 갱신, 서버 재시작 불필요.
+
 ## 최신 변경: 2026-10-10 이미지 실제 첨부 누락 수정
 
 - 운영 공개 API 확인: 등록된 Activities 3개/Projects 2개의 photos가 모두 빈 배열. 활동 일러스트는 content.js의 대체 표시만 있었고 프로젝트 이미지 및 관리자 첨부 사진은 없었음. 운영 이미지 정적 URL은 200으로 존재 확인.

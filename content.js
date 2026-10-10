@@ -157,9 +157,6 @@
       if (link) copy.append(link);
 
       const photo = validPhotos(item)[0];
-      if (photo?.name?.startsWith('ai-generated-')) {
-        copy.append(makeElement('p', 'ai-image-label', 'AI 생성 일러스트'));
-      }
 
       if (photo) {
         image.append(
@@ -200,12 +197,12 @@
     };
     if (validPhotos(item).length === 0 && illustrations[item.id]) {
       const figure = makeElement('figure', 'activity-illustration');
-      const img = makePhoto({url: illustrations[item.id]}, `${item.title} — AI 생성 일러스트`, () => {
+      const img = makePhoto({url: illustrations[item.id]}, `${item.title} 일러스트`, () => {
         figure.replaceChildren(makeActivityPlaceholder('일러스트를 표시할 수 없습니다.'));
       });
       img.width = 1536;
       img.height = 1024;
-      figure.append(img, makeElement('figcaption', '', 'AI 생성 일러스트'));
+      figure.append(img);
       return figure;
     }
     const slider = makeElement("div", "activity-slider");
@@ -402,9 +399,6 @@
         makeElement("h2", "", item.title),
         makeElement("p", "", item.description || "")
       );
-      if (validPhotos(item).some(photo => photo.name?.startsWith('ai-generated-'))) {
-        copy.append(makeElement('p', 'ai-image-label', 'AI 생성 일러스트'));
-      }
 
       article.append(createSlider(item), copy);
       fragment.append(article);

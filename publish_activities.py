@@ -1,5 +1,6 @@
 """Publish activity introductions; no invented event dates, photos or outcomes."""
 from publish_content import publish
+from cleanup_activity_copy import clean_text
 
 ACTIVITIES = [
     ('activities', 'activity-seminars', {
@@ -15,6 +16,9 @@ ACTIVITIES = [
         'description': 'VODA 홈페이지에 공개된 독립운동가 관계망과 안동 지역 독립운동 연구 보고서를 소개합니다. 인물·단체·사건 사이의 연결과 지역의 역사 기록을 함께 살펴볼 수 있는 자료입니다.\n\n관계망에서는 인물 검색과 연도 필터를 이용해 연결을 탐색할 수 있습니다. 연구 보고서에서는 안동 내앞마을과 풍산 일대의 독립운동, 신간회 안동지회, 역사적 평가와 서훈 과제를 다룹니다.\n\nProjects에서 관계망을 직접 조작하거나 보고서 본문을 읽어보세요. 이 글은 공개 자료 활용 안내이며 별도 오프라인 행사의 후기는 아닙니다.',
     }),
 ]
+
+for _, _, body in ACTIVITIES:
+    body['description'] = clean_text(body['description'])
 
 if __name__ == '__main__':
     publish(ACTIVITIES)
