@@ -496,6 +496,16 @@
      ======================================== */
 
   setupLayout();
+  const secretTrigger = document.querySelector('#secret-quiz-trigger');
+  if (secretTrigger) {
+    let taps = 0, lastTap = 0;
+    secretTrigger.addEventListener('click', () => {
+      const now = Date.now();
+      taps = now - lastTap > 2000 ? 1 : taps + 1;
+      lastTap = now;
+      if (taps >= 5) location.assign('/analysis/quiz/');
+    });
+  }
   setupProjectTabs();
   if (document.querySelector('#home-posts, #voda-board-posts')) {
     const target = document.querySelector('#home-posts, #voda-board-posts');

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>숨은 퀴즈 | VODA</title>
+  <link rel="stylesheet" href="quiz.css">
+  <script src="questions.js" defer></script>
+  <script src="quiz.js" defer></script>
+</head>
+<body>
+  <header><a href="/" aria-label="VODA 홈"><img src="/images/logo.png" alt="VODA"></a><a href="/">홈으로 돌아가기 ↗</a></header>
+  <main>
+    <section id="intro" class="card">
+      <span class="eyebrow">YOU FOUND IT</span>
+      <h1>여기까지 찾아온 당신,<br>시를 얼마나 알고 있나요?</h1>
+      <p>작가와 작품, 시에 담긴 마음을 만나는 작은 퀴즈.<br>14개의 문제 중 3개를 뽑아 도전해보세요.</p>
+      <div class="chips"><span>3문제</span><span>시간 제한 없음</span><span>정답과 해설</span></div>
+      <button id="start" class="primary">문제 3개 뽑기 →</button>
+    </section>
+    <section id="game" class="card" hidden>
+      <div class="progress-line"><span id="progress-text"></span><span id="score-text"></span></div>
+      <progress id="progress" max="3" value="0" aria-label="퀴즈 진행도"></progress>
+      <span id="question-number" class="eyebrow"></span>
+      <h1 id="question" tabindex="-1"></h1>
+      <div id="choices" role="group" aria-labelledby="question"></div>
+      <div id="feedback" role="status" aria-live="polite" hidden></div>
+      <button id="next" class="primary" hidden>다음 문제 →</button>
+    </section>
+    <section id="result" class="card" hidden>
+      <span class="eyebrow">QUEST COMPLETE</span>
+      <h1 id="result-heading" tabindex="-1">도전 완료!</h1>
+      <p id="result-score" class="result-score"></p>
+      <p id="result-message"></p>
+      <div id="review"></div>
+      <button id="restart" class="primary">다시 뽑기 ↻</button>
+      <a class="secondary" href="/projects">VODA 프로젝트 둘러보기 →</a>
+    </section>
+  </main>
+  <footer>VODA · 데이터와 사람을 보다</footer>
+</body>
+</html>

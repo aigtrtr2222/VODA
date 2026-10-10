@@ -446,6 +446,9 @@ textarea:focus-visible {
   height: auto;
 }
 
+#secret-quiz-trigger { position: absolute; left: 30%; top: 28%; width: 40%; height: 55%; pointer-events: auto; border: 0; background: transparent; cursor: pointer; border-radius: 50%; touch-action: manipulation; }
+#secret-quiz-trigger:focus-visible { outline: 3px dashed #009f99; outline-offset: 4px; }
+
 /* ---------- 공지사항 ---------- */
 
 .home-notices {
