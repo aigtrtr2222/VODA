@@ -1,5 +1,14 @@
 # VODA 노트북 Codex 인수인계
 
+## 최신 변경: 2026-10-10 이미지 실제 첨부 누락 수정
+
+- 운영 공개 API 확인: 등록된 Activities 3개/Projects 2개의 photos가 모두 빈 배열. 활동 일러스트는 content.js의 대체 표시만 있었고 프로젝트 이미지 및 관리자 첨부 사진은 없었음. 운영 이미지 정적 URL은 200으로 존재 확인.
+- attach_content_images.py 추가: manage.py backup 실행 후 하나의 트랜잭션에서 기존 5개 글에 생성 일러스트를 WebP 사진으로 저장하고 /media/ 참조 연결. 본문/작성일 유지, updatedAt 갱신, 기존 사진이 있으면 보존, 누락된 글은 건너뜀. 역사 프로젝트 2개는 역사 탐구 일러스트 사용.
+- 활동/프로젝트 화면에 AI 생성 일러스트 표시 유지. content.js URL 버전을 변경해 이전 캐시 갱신 유도.
+- tests/test_content_images.py 임시 DB 검증 통과: 5개 글 첨부, 실제 이미지 API 응답, 정상 관리자 저장 경로에서 이미지 유지, 재실행 중복 없음/기존 데이터 보존/백업 생성.
+- 임시 DB + 실제 Chrome에서 활동 이미지 3개/프로젝트 이미지 2개 로딩 및 모바일 가로 넘침 없음/JS 오류 없음 확인.
+- 서버 반영: `cd ~/VODA && git pull --ff-only && .venv/bin/python attach_content_images.py`. Attached 5가 최초 정상 결과. 기존 첨부는 preserved, 누락된 글은 missing posts로 구분. 운영 DB 쓰기는 사용자 SSH 실행 대기. 재시작 불필요.
+
 ## 최신 변경: 2026-10-10 메인 Activities 연동
 
 - 원인: 메인은 board API만 읽어 활동 분류 게시글만 표시하고 Activities는 제외했음.

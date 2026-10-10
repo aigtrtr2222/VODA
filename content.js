@@ -157,6 +157,9 @@
       if (link) copy.append(link);
 
       const photo = validPhotos(item)[0];
+      if (photo?.name?.startsWith('ai-generated-')) {
+        copy.append(makeElement('p', 'ai-image-label', 'AI 생성 일러스트'));
+      }
 
       if (photo) {
         image.append(
@@ -399,6 +402,9 @@
         makeElement("h2", "", item.title),
         makeElement("p", "", item.description || "")
       );
+      if (validPhotos(item).some(photo => photo.name?.startsWith('ai-generated-'))) {
+        copy.append(makeElement('p', 'ai-image-label', 'AI 생성 일러스트'));
+      }
 
       article.append(createSlider(item), copy);
       fragment.append(article);
