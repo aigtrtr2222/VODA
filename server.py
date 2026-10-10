@@ -19,8 +19,8 @@ DATA.mkdir(parents=True, exist_ok=True)
 DB = DATA / 'voda.sqlite3'
 SECURE_COOKIE = os.environ.get('VODA_HTTPS', '0') == '1'
 KINDS = Literal['board', 'projects', 'activities']
-MAX_PHOTO = 5 * 1024 * 1024
-Image.MAX_IMAGE_PIXELS = 20_000_000
+MAX_PHOTO = 10 * 1024 * 1024
+Image.MAX_IMAGE_PIXELS = 40_000_000
 
 @contextmanager
 def db():
@@ -227,7 +227,7 @@ def delete_item(kind: KINDS, item_id: str, updatedAt: int, username=Depends(admi
 def upload_photo(file: UploadFile = File(...), username=Depends(admin)):
     raw = file.file.read(MAX_PHOTO + 1)
     if len(raw) > MAX_PHOTO:
-        raise HTTPException(413, '사진 한 장은 5MB 이하여야 합니다.')
+        raise HTTPException(413, '사진 한 장은 10MB 이하여야 합니다.')
     try:
         with warnings.catch_warnings():
             warnings.simplefilter('error', Image.DecompressionBombWarning)
@@ -243,7 +243,7 @@ def upload_photo(file: UploadFile = File(...), username=Depends(admin)):
                 output = io.BytesIO()
                 clean.save(output, format='WEBP', quality=88)
     except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError, Image.DecompressionBombWarning):
-        raise HTTPException(422, '올바른 JPG·PNG·WebP 사진을 선택해주세요. 최대 2천만 화소입니다.')
+        raise HTTPException(422, '올바른 JPG·PNG·WebP 사진을 선택해주세요. 최대 4천만 화소입니다.')
     photo_id = str(uuid4())
     name = Path((file.filename or 'photo').replace('\\', '/')).name[:160]
     with db() as c:

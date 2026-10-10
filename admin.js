@@ -9,7 +9,7 @@
 
 
 
-  const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
+  const MAX_PHOTO_SIZE = 10 * 1024 * 1024;
   const ALLOWED_PHOTO_TYPES = [
     "image/jpeg",
     "image/png",
@@ -365,8 +365,8 @@
 
     document.querySelector("#image-help").textContent =
       currentTab === "projects"
-        ? "대표 이미지 한 장을 선택하세요. 사진 한 장당 최대 5MB입니다."
-        : "사진을 여러 장 선택할 수 있습니다. 화살표로 순서를 바꾸세요. 사진 한 장당 최대 5MB입니다.";
+        ? "대표 이미지 한 장을 선택하세요. 사진 한 장당 최대 10MB·4천만 화소입니다."
+        : "사진을 여러 장 선택할 수 있습니다. 화살표로 순서를 바꾸세요. 사진 한 장당 최대 10MB·4천만 화소입니다.";
 
     updateControls();
   }
@@ -418,7 +418,7 @@
 
     if (invalid) {
       setMessage(
-        "JPG·PNG·WebP 형식의 5MB 이하 사진을 선택해주세요.",
+        "JPG·PNG·WebP 형식의 10MB 이하 사진을 선택해주세요.",
         true
       );
       return;

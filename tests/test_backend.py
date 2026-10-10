@@ -47,7 +47,7 @@ def test_board_shared_persistent_crud_conflict_search():
 def test_photos_content_validation_and_order():
     client = authenticated()
     assert client.post('/api/photos', files={'file':('fake.png',b'<script>bad</script>','image/png')}, headers=HEADERS).status_code == 422
-    assert client.post('/api/photos', files={'file':('large.png',b'x'*(5*1024*1024+1),'image/png')}, headers=HEADERS).status_code == 413
+    assert client.post('/api/photos', files={'file':('large.png',b'x'*(10*1024*1024+1),'image/png')}, headers=HEADERS).status_code == 413
     ids=[]
     for color in ['red', 'blue']:
         raw=io.BytesIO(); Image.new('RGB',(20,20),color).save(raw,format='PNG')
@@ -64,6 +64,26 @@ def test_photos_content_validation_and_order():
     assert client.post('/api/content/projects',json={**value,'photos':ids[:1],'link':'https://example.org'},headers=HEADERS).status_code == 201
     assert client.post('/api/content/board',json={'title':'  ','content':'abc'},headers=HEADERS).status_code == 422
     assert client.post('/api/content/activities',json={**value,'photos':[{'id':'missing'}]},headers=HEADERS).status_code == 422
+
+def test_photo_size_and_pixel_boundaries():
+    client = authenticated()
+    raw = io.BytesIO()
+    Image.new('RGB', (20, 20), 'red').save(raw, format='PNG')
+    # A valid PNG plus trailing padding exercises the exact multipart byte cap.
+    padded = raw.getvalue().ljust(10 * 1024 * 1024, b'\0')
+    assert client.post('/api/photos', files={'file': ('limit.png', padded, 'image/png')}, headers=HEADERS).status_code == 201
+    assert client.post('/api/photos', files={'file': ('over.png', padded + b'\0', 'image/png')}, headers=HEADERS).status_code == 413
+    for height, expected in [(8000, 201), (8001, 422)]:
+        raw = io.BytesIO()
+        with Image.new('RGB', (5000, height), 'white') as img:
+            img.save(raw, format='JPEG')
+        response = client.post('/api/photos', files={'file': ('pixels.jpg', raw.getvalue(), 'image/jpeg')}, headers=HEADERS)
+        assert response.status_code == expected, response.text
+        if expected == 201:
+            media = client.get(response.json()['url'])
+            with Image.open(io.BytesIO(media.content)) as saved:
+                assert max(saved.size) <= 2400
+
 
 def test_static_navigation_and_login_rate_limit():
     client=TestClient(app)
