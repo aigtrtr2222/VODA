@@ -176,6 +176,8 @@
     let selectedCategory = "all";
 
     function render() {
+      const more = root.querySelector('.home-more');
+      if (more) more.href = selectedCategory === 'activity' ? '/activities' : '/board';
       const posts = readPosts().filter(post =>
         selectedCategory === "all" ||
         post.category === selectedCategory
@@ -199,7 +201,9 @@
           `[${categoryLabel(post.category)}] ${post.title}`
         );
 
-        link.href = `board?id=${encodeURIComponent(post.id)}`;
+        link.href = post.source === 'activities'
+          ? `/activities#activity-${encodeURIComponent(post.id)}`
+          : `/board?id=${encodeURIComponent(post.id)}`;
 
         const date = createElement("time", "post-date", post.date);
 
@@ -496,8 +500,17 @@
   if (document.querySelector('#home-posts, #voda-board-posts')) {
     const target = document.querySelector('#home-posts, #voda-board-posts');
     target.textContent = '불러오는 중입니다.';
-    VodaAPI.list('board').then(posts => {
-      serverPosts = posts;
+    const isHome = Boolean(document.querySelector('#home-posts'));
+    Promise.all([VodaAPI.list('board'), isHome ? VodaAPI.list('activities') : Promise.resolve([])]).then(([posts, activities]) => {
+      const activityPosts = activities.map(item => ({
+        ...item,
+        source: 'activities',
+        category: 'activity',
+        date: new Date(item.createdAt).toLocaleDateString('sv-SE', {timeZone: 'Asia/Seoul'}).replaceAll('-', '.')
+      }));
+      serverPosts = isHome
+        ? [...posts, ...activityPosts].sort((a, b) => b.createdAt - a.createdAt || String(b.id).localeCompare(String(a.id)))
+        : posts;
       setupHome();
       setupBoard();
     }).catch(error => {

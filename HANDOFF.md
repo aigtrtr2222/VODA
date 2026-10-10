@@ -1,5 +1,14 @@
 # VODA 노트북 Codex 인수인계
 
+## 최신 변경: 2026-10-10 메인 Activities 연동
+
+- 원인: 메인은 board API만 읽어 활동 분류 게시글만 표시하고 Activities는 제외했음.
+- 메인에서 board와 activities를 함께 조회해 작성일 최신순으로 합친 뒤 최대 6개 표시. 전체/활동 탭에 Activities가 포함되고 공지/모집 분류는 유지. Board 목록 자체는 기존대로 유지.
+- 활동 링크는 `/activities#activity-ID`로 해당 활동 위치에 이동. 활동 탭 더보기는 `/activities`. AI 이미지의 원본 크기를 지정해 이미지 로딩에 따른 위치 이동 감소.
+- tests/browser_check.py에 메인 전체/활동/공지 필터와 활동 이동 검증 추가. 이전 보고서 카드 추가로 중복된 프로젝트 분류 선택자를 프로젝트 항목 안으로 한정하여 테스트 오류 수정.
+- 임시 DB + 실제 Chrome 전체 검사 통과: 새 홈 연동, 기존 게시판 CRUD/사진/프로젝트/관계망/모바일/재시작 후 보존. 예상 밖 HTTP·JavaScript 오류 없음.
+- 배포는 `cd ~/VODA && git pull --ff-only` 후 브라우저 강력 새로고침. 정적 파일만 변경, DB 변경·서버 재시작 불필요. 운영 반영은 사용자 서버 터미널 실행 대기.
+
 ## 최신 변경: 2026-10-10 Activities AI 일러스트
 
 - built-in image_gen으로 스터디/공모전 협업/역사 자료 탐구 일러스트 3장 생성. 원본 PNG를 images/activities/{seminar,team,history}-ai.png로 복사. 프롬프트는 같은 폴더 GENERATION.md에 기록.

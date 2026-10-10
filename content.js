@@ -200,6 +200,8 @@
       const img = makePhoto({url: illustrations[item.id]}, `${item.title} — AI 생성 일러스트`, () => {
         figure.replaceChildren(makeActivityPlaceholder('일러스트를 표시할 수 없습니다.'));
       });
+      img.width = 1536;
+      img.height = 1024;
       figure.append(img, makeElement('figcaption', '', 'AI 생성 일러스트'));
       return figure;
     }
@@ -390,6 +392,7 @@
 
     for (const item of items) {
       const article = makeElement("article", "activity-row");
+      article.id = `activity-${item.id}`;
       const copy = makeElement("div", "activity-copy");
 
       copy.append(
@@ -402,6 +405,14 @@
     }
 
     activitiesRoot.replaceChildren(fragment);
+    function scrollToActivity() {
+      const id = location.hash.slice(1);
+      if (!id.startsWith('activity-')) return;
+      const target = document.getElementById(decodeURIComponent(id));
+      if (target && activitiesRoot.contains(target)) target.scrollIntoView({block: 'start'});
+    }
+    scrollToActivity();
+    window.addEventListener('hashchange', scrollToActivity);
   }
 
   /* ==================================================
