@@ -1,5 +1,12 @@
 # VODA 노트북 Codex 인수인계
 
+## 최신 변경: 2026-10-10 Activities AI 일러스트
+
+- built-in image_gen으로 스터디/공모전 협업/역사 자료 탐구 일러스트 3장 생성. 원본 PNG를 images/activities/{seminar,team,history}-ai.png로 복사. 프롬프트는 같은 폴더 GENERATION.md에 기록.
+- content.js에서 승인된 Activities 3개 ID에 사진이 없을 때만 일러스트를 표시하고 AI 생성 일러스트 캡션 추가. 실제 업로드 사진이 있으면 기존 슬라이더 우선. 운영 DB 수정 없음.
+- 임시 DB + Chrome에서 3장 로딩, 모바일 가로 넘침, 업로드 사진 우선 표시, JS 오류 없음 통과. 데스크톱/모바일 스크린샷 검수 완료.
+- 서버 반영: `cd ~/VODA && git pull --ff-only`. 아직 활동 글을 등록하지 않았다면 `.venv/bin/python publish_activities.py` 추가 실행. 정적 파일 변경으로 재시작 불필요. 실제 운영 반영은 사용자 SSH 실행 대기.
+
 ## 최신 변경: 2026-10-10 Activities 소개 3개 준비
 
 - 사용자 요청으로 지부별 세미나, 공모전 TF, 독립운동 공개 자료 탐구 소개를 publish_activities.py에 작성. 기존 공개 모집 안내 및 제공된 자료에 근거하며 확인하지 않은 행사 날짜·참가 인원·수상 성과·사진은 추가하지 않음.

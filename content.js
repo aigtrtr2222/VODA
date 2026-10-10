@@ -190,6 +190,19 @@
   ================================================== */
 
   function createSlider(item) {
+    const illustrations = {
+      'voda-20261010-activity-seminars': '/images/activities/seminar-ai.png',
+      'voda-20261010-activity-competition-teams': '/images/activities/team-ai.png',
+      'voda-20261010-activity-history-exploration': '/images/activities/history-ai.png'
+    };
+    if (validPhotos(item).length === 0 && illustrations[item.id]) {
+      const figure = makeElement('figure', 'activity-illustration');
+      const img = makePhoto({url: illustrations[item.id]}, `${item.title} — AI 생성 일러스트`, () => {
+        figure.replaceChildren(makeActivityPlaceholder('일러스트를 표시할 수 없습니다.'));
+      });
+      figure.append(img, makeElement('figcaption', '', 'AI 생성 일러스트'));
+      return figure;
+    }
     const slider = makeElement("div", "activity-slider");
     const photoArea = makeElement("div", "activity-slides");
     const dotsArea = makeElement("div", "activity-dots");
