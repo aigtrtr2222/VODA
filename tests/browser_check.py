@@ -180,7 +180,7 @@ def main():
                 expect(visitor.locator('.project-entry .project-category')).to_have_text('데이터 분석')
                 expect(visitor.locator('.managed-project-link')).to_have_attribute('href', 'https://example.org/')
                 visitor.locator('[data-project-tab=analysis]').click()
-                analysis = visitor.frame_locator('iframe')
+                analysis = visitor.frame_locator('.project-analysis-frame')
                 expect(analysis.locator('h1')).to_have_text('독립운동가 관계망')
                 expect(analysis.locator('#net canvas')).to_be_visible()
                 expect(analysis.locator('#orgList .org-item')).to_have_count(55)
@@ -202,7 +202,7 @@ def main():
                 expect(analysis.locator('#panel h2')).not_to_have_text('관계망 읽는 법')
                 analysis.locator('#tgEvents').uncheck()
                 analysis.locator('#tgEvents').check()
-                expect(visitor.locator('iframe')).to_have_attribute('sandbox', 'allow-scripts allow-downloads')
+                expect(visitor.locator('.project-analysis-frame')).to_have_attribute('sandbox', 'allow-scripts allow-downloads')
                 # Standalone view also works without external fonts or CDN fallback.
                 visitor_context.route('https://fonts.googleapis.com/**', lambda route: route.abort())
                 visitor_context.route('https://fonts.gstatic.com/**', lambda route: route.abort())

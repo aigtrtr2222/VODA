@@ -1,5 +1,7 @@
 # 노트북 테스트 체크리스트
 
+- [x] 2026-10-11 임시 DB/Chrome 미니게임 검사: 낙하·충돌·합체·광복 승리·넘침 패배·재시작·탭 일시정지·모바일 터치·키보드 통과. 재실행: `.\.venv\Scripts\python.exe tests\minigame_browser_check.py`.
+
 각 항목의 실제 실행 결과를 기록하세요. 아래 항목은 아직 Windows에서 완료됐다는 표시가 아닙니다.
 
 - [x] `test.bat`에서 API 테스트 4개 통과.

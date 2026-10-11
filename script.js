@@ -250,6 +250,12 @@
 
     if (buttons.length === 0) return;
 
+    const embeddedGame = document.querySelector('#minigame-frame');
+    embeddedGame?.addEventListener('load', () => {
+      const panel = document.querySelector('[data-project-panel="minigame"]');
+      embeddedGame.contentWindow?.postMessage({type:'voda-game-visibility',visible:!panel.hidden}, '*');
+    });
+
     function selectTab(selectedButton) {
       buttons.forEach(button => {
         const selected = button === selectedButton;
@@ -263,6 +269,12 @@
           panel.dataset.projectPanel !==
           selectedButton.dataset.projectTab;
       });
+      const gameFrame = document.querySelector('#minigame-frame');
+      if (gameFrame) {
+        const visible = selectedButton.dataset.projectTab === 'minigame';
+        if (visible && !gameFrame.getAttribute('src')) gameFrame.src = gameFrame.dataset.src;
+        gameFrame.contentWindow?.postMessage({type:'voda-game-visibility',visible}, '*');
+      }
     }
 
     buttons.forEach(button => {

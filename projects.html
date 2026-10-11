@@ -8,7 +8,7 @@
 
   <link rel="stylesheet" href="style.css">
   <script src="api.js" defer></script>
-  <script src="script.js" defer></script>
+  <script src="script.js?v=20261011-minigame" defer></script>
   <script src="content.js?v=20261010-clean-copy" defer></script>
 </head>
 
@@ -42,6 +42,7 @@
         >
           독립운동가 관계망
         </button>
+        <button type="button" class="projects-tab" data-project-tab="minigame">미니게임</button>
       </div>
 
       <!-- 프로젝트 목록 -->
@@ -72,6 +73,10 @@
           title="독립운동가 관계망" sandbox="allow-scripts allow-downloads" loading="lazy"></iframe>
       </section>
 
+      <section data-project-panel="minigame" aria-label="미니게임" hidden>
+        <p class="project-analysis-actions"><a href="/analysis/minigame/" target="_blank" rel="noopener noreferrer">미니게임을 새 탭에서 크게 보기 ↗</a></p>
+        <iframe id="minigame-frame" data-src="/analysis/minigame/" title="광복을 향해 미니게임" sandbox="allow-scripts" style="width:100%;height:1100px;border:0;border-radius:16px;"></iframe>
+      </section>
     </div>
   </main>
 

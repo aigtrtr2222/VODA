@@ -1,0 +1,10 @@
+# 광복을 향해
+
+- Rule reference: https://suikagame.jp/about/ (Aladdin X official Suika Game introduction). Original game code, interface and branded graphics are not copied.
+- Physics: Matter.js 0.20.0, https://github.com/liabru/matter-js/tree/0.20.0 . Vendored matter.min.js and MATTER-LICENSE.txt (MIT). No runtime CDN required.
+- Portrait atlas: generated with built-in image_gen on 2026-10-11 and copied unchanged to portraits.png. These are stylized motifs, not archival portraits. Cell order: Yu Gwan-sun, An Jung-geun, Yun Bong-gil, Yi Yuk-sa, Yun Dong-ju, Kim Gu. The sequence is for gameplay, not a historical ranking.
+- Final flag is drawn in canvas with a taegeuk and four trigrams. No source PDF, private data or database included.
+
+## Image prompt
+
+Create one sprite atlas of SIX Korean independence activist portrait medallions for a respectful educational ball merging game. Exact layout: 3 columns by 2 rows equal cells, landscape image 1536x1024, white background, no margins or dividers. Each portrait centered exactly within its own 512x512 cell, contained inside a circular mint/cream disc of diameter 400px; generous white gutters. Top left Yu Gwan-sun: young Korean woman with center-parted hair pulled back, white hanbok black collar. Top middle An Jung-geun: Korean man short neatly parted hair and recognizable dark mustache, early twentieth century suit. Top right Yun Bong-gil: young Korean man swept side parted short hair, no mustache, dark suit. Bottom left Yi Yuk-sa: Korean man short combed side hair, composed expression dark suit. Bottom middle Yun Dong-ju: young Korean man soft youthful face short side parted hair, round collar school uniform. Bottom right Kim Gu: older Korean man round eyeglasses, receding hairline, white hanbok. Style: consistent beautifully illustrated warm flat cartoon portraits, navy fine outlines, muted mint and warm gold accents, recognizable motif caricatures rather than photographic likenesses, sober warm expressions, clean readable facial features at small sizes. Head and shoulders only. No text, no names, no lettering, no flags, no watermarks. All six equal size exactly centered regular grid.

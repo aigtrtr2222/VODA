@@ -1,0 +1,11 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>광복을 향해 | VODA 미니게임</title><link rel="stylesheet" href="game.css"><script src="matter.min.js" defer></script><script src="engine.js" defer></script><script src="game.js" defer></script></head>
+<body><main>
+<header><span class="eyebrow">VODA MINI GAME</span><h1>광복을 향해</h1><p>같은 인물을 만나게 해 마지막 태극기를 완성하세요.</p></header>
+<div class="layout"><section class="play">
+<div class="stats"><span>점수 <strong id="score">0</strong></span><span>다음 <strong id="next-name">—</strong></span><button id="pause" disabled>일시정지</button></div>
+<div class="board"><canvas id="game" width="420" height="590" tabindex="0" aria-label="공을 떨어뜨리는 게임판. 좌우 방향키로 이동하고 스페이스로 떨어뜨립니다."></canvas>
+<div id="overlay"><div class="message"><span id="symbol">✦</span><h2 id="heading">작은 만남에서 시작해요</h2><p id="message">같은 얼굴의 공 두 개가 만나면<br>다음 인물로 이어집니다.</p><button id="start">게임 시작</button></div></div></div>
+<div class="controls"><label for="aim">떨어뜨릴 위치</label><input id="aim" type="range" min="40" max="380" value="210"><button id="drop" disabled>공 놓기 ↓</button></div>
+<p id="status" role="status" aria-live="polite">게임을 시작해보세요.</p>
+</section><aside><h2>만남의 순서</h2><ol id="levels"></ol><div class="guide"><h2>플레이 방법</h2><p>마우스나 손가락으로 위치를 정하고 공을 놓으세요. 방향키와 스페이스, 아래 위치 조절 막대도 사용할 수 있습니다.</p><p>점선을 넘어 공이 쌓이면 게임이 끝납니다. 김구 공 두 개를 합치면 태극기와 함께 <strong>광복!</strong></p></div><button id="restart">처음부터 다시</button><p id="restart-confirm" hidden>진행 중인 게임을 다시 시작할까요? <button id="confirm-restart">다시 시작</button><button id="cancel-restart">취소</button></p></aside></div>
+</main></body></html>
