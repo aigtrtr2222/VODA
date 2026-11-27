@@ -7,9 +7,18 @@ if [[ "$EUID" -eq 0 ]]; then
   exit 1
 fi
 
-site="${1:-voda-run.duckdns.org}"
+site="${1:-}"
+if [[ -z "$site" ]]; then
+  echo 'Usage: bash deploy/enable-server.sh your-domain.example' >&2
+  exit 1
+fi
 if [[ ! "$site" =~ ^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$ || "$site" != *.* ]]; then
   echo 'A valid lowercase domain name is required.' >&2
+  exit 1
+fi
+port="${VODA_PORT:-8000}"
+if [[ ! "$port" =~ ^[0-9]{2,5}$ ]]; then
+  echo 'VODA_PORT must be a port number.' >&2
   exit 1
 fi
 
@@ -30,12 +39,31 @@ with sqlite3.connect('file:data/voda.sqlite3?mode=ro', uri=True) as db:
 PY
 
 sudo -v
+# This script replaces /etc/caddy/Caddyfile. Refuse if it already serves other sites,
+# unless VODA_REPLACE_CADDY=1 is set explicitly. VODA_SKIP_CADDY=1 leaves Caddy untouched
+# (for servers that already host other sites; add the VODA block by hand).
+skip_caddy="${VODA_SKIP_CADDY:-0}"
+if [[ "$skip_caddy" != 1 ]] && sudo test -f /etc/caddy/Caddyfile && [[ "${VODA_REPLACE_CADDY:-0}" != 1 ]]; then
+  others=''
+  while IFS= read -r line; do
+    name="${line%%\{*}"
+    name="${name%"${name##*[![:space:]]}"}"
+    [[ "$name" == ':80' || "$name" == "$site" ]] || others+="  $name"$'\n'
+  done < <(sudo grep -E '^[^#[:space:]][^{]*\{' /etc/caddy/Caddyfile || true)
+  if [[ -n "$others" ]]; then
+    echo 'The existing /etc/caddy/Caddyfile already serves other sites:' >&2
+    printf '%s' "$others" >&2
+    echo 'Rerun with VODA_SKIP_CADDY=1 and add a VODA block by hand (see README),' >&2
+    echo 'or rerun with VODA_REPLACE_CADDY=1 to replace the whole file.' >&2
+    exit 1
+  fi
+fi
 server_user="$(id -un)"
 config_stamp="$(date -u +%Y%m%dT%H%M%S)-$$"
 if sudo test -f /etc/systemd/system/voda.service; then
   sudo cp -p /etc/systemd/system/voda.service "/etc/systemd/system/voda.service.backup-$config_stamp"
 fi
-if sudo test -f /etc/caddy/Caddyfile; then
+if [[ "$skip_caddy" != 1 ]] && sudo test -f /etc/caddy/Caddyfile; then
   sudo cp -p /etc/caddy/Caddyfile "/etc/caddy/Caddyfile.backup-$config_stamp"
 fi
 chmod 700 "$app_dir/data"
@@ -53,7 +81,7 @@ WorkingDirectory=$app_dir
 Environment=VODA_DATA_DIR=$app_dir/data
 Environment=VODA_HTTPS=1
 Environment=PYTHONDONTWRITEBYTECODE=1
-ExecStart=$app_dir/.venv/bin/python -m uvicorn server:app --host 127.0.0.1 --port 8000 --proxy-headers --forwarded-allow-ips=127.0.0.1 --no-access-log
+ExecStart=$app_dir/.venv/bin/python -m uvicorn server:app --host 127.0.0.1 --port $port --proxy-headers --forwarded-allow-ips=127.0.0.1 --no-access-log
 Restart=on-failure
 RestartSec=5
 UMask=0077
@@ -67,24 +95,26 @@ ReadWritePaths=$app_dir/data
 WantedBy=multi-user.target
 EOF
 
-sudo tee /etc/caddy/Caddyfile >/dev/null <<EOF
+if [[ "$skip_caddy" != 1 ]]; then
+  sudo tee /etc/caddy/Caddyfile >/dev/null <<EOF
 $site {
-    reverse_proxy 127.0.0.1:8000
+    reverse_proxy 127.0.0.1:$port
 }
 EOF
+  sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+fi
 
-sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 sudo systemd-analyze verify /etc/systemd/system/voda.service
 sudo systemctl daemon-reload
-sudo systemctl enable voda.service caddy.service
+sudo systemctl enable voda.service
 sudo systemctl restart voda.service
 
-.venv/bin/python - <<'PY'
-import time
+VODA_PORT="$port" .venv/bin/python - <<'PY'
+import os, time
 import urllib.request
 for attempt in range(30):
     try:
-        with urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=2) as response:
+        with urllib.request.urlopen(f"http://127.0.0.1:{os.environ['VODA_PORT']}/api/health", timeout=2) as response:
             if response.status == 200:
                 print('VODA backend health: OK')
                 break
@@ -94,6 +124,14 @@ else:
     raise SystemExit('Backend did not start. Check: sudo journalctl -u voda -n 40 --no-pager')
 PY
 
+if [[ "$skip_caddy" == 1 ]]; then
+  sudo systemctl is-active voda.service
+  echo "VODA is running on 127.0.0.1:$port. Caddy was not changed."
+  echo "Add this block to /etc/caddy/Caddyfile, then run: sudo systemctl reload caddy"
+  printf '\n%s {\n    reverse_proxy 127.0.0.1:%s\n}\n\n' "$site" "$port"
+  exit 0
+fi
+sudo systemctl enable caddy.service
 sudo systemctl restart caddy.service
 sudo systemctl is-active voda.service caddy.service
 echo "Services started. Caddy is obtaining the HTTPS certificate."

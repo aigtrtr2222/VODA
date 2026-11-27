@@ -104,6 +104,157 @@ Windows 방화벽 허용 창이 뜨면 "개인 네트워크"를 허용하세요.
 
 ---
 
+## 7. 서버에 배포하기 (인터넷에 공개)
+
+내 컴퓨터를 꺼도 누구나 `https://내도메인` 으로 접속할 수 있게 하는 방법입니다.
+
+**구성:** Ubuntu 24.04 서버 → `systemd`가 VODA(uvicorn, `127.0.0.1:8000`)를 항상 실행 → `Caddy`가 HTTPS 인증서 자동 발급 + 리버스 프록시.
+이 과정은 `deploy/enable-server.sh` 스크립트가 처리합니다.
+
+**필요한 것**
+
+| 항목 | 예시 | 비고 |
+|---|---|---|
+| Ubuntu 24.04 서버 | Google Cloud `e2-micro`, AWS Lightsail, 집 PC 등 | 공인 IP가 있어야 함. 디스크는 영구 디스크 |
+| 도메인 | `myclub.duckdns.org` | [DuckDNS](https://www.duckdns.org)에서 무료로 만들 수 있음 |
+| 방화벽 | TCP **80, 443** 허용 | Caddy 인증서 발급에 둘 다 필요 |
+
+### 7-1. 서버 만들기 (Google Cloud 예시)
+
+다른 클라우드를 쓰면 "Ubuntu 24.04 VM 생성 + 80/443 허용"만 하면 됩니다. 이미 서버가 있으면 건너뛰세요.
+
+```bash
+# 로컬 또는 Cloud Shell에서 (gcloud 로그인·프로젝트 선택이 되어 있어야 함)
+gcloud compute instances create voda-server \
+  --zone=us-west1-a --machine-type=e2-micro \
+  --image-family=ubuntu-2404-lts-amd64 --image-project=ubuntu-os-cloud \
+  --boot-disk-size=20GB --tags=http-server,https-server
+gcloud compute firewall-rules create allow-web --allow=tcp:80,tcp:443 \
+  --target-tags=http-server,https-server   # 이미 있으면 오류가 나도 괜찮음
+gcloud compute instances describe voda-server --zone=us-west1-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'   # 외부 IP 확인
+```
+
+서버 재시작 후에도 IP가 바뀌지 않게 하려면 콘솔에서 외부 IP를 **고정(static)** 으로 바꾸세요.
+
+### 7-2. 도메인을 서버 IP에 연결
+
+DuckDNS에 로그인해 서브도메인을 만들고, `current ip` 칸에 위에서 확인한 서버 외부 IP를 넣고 **update ip**를 누릅니다.
+연결 확인 (서버 IP가 나와야 다음 단계로):
+
+```bash
+getent hosts myclub.duckdns.org    # 또는 nslookup myclub.duckdns.org
+```
+
+### 7-3. 서버에 설치
+
+서버에 SSH로 접속합니다 (GCP: `gcloud compute ssh voda-server --zone=us-west1-a`). **root가 아닌 일반 사용자**로 진행합니다.
+
+```bash
+sudo apt update
+sudo apt install -y git python3-venv python3-pip caddy
+cd ~
+git clone https://github.com/aigtrtr2222/VODA.git
+cd ~/VODA
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+```
+
+경로에 공백이 없어야 합니다 (`~/VODA` 권장).
+
+### 7-4. 관리자 계정 만들기 (사람이 직접 입력)
+
+```bash
+cd ~/VODA
+.venv/bin/python manage.py create-admin
+```
+
+아이디와 비밀번호(12자 이상)를 **터미널에 직접** 입력합니다. 이 단계가 끝나야 `data/voda.sqlite3`가 생기고 다음 스크립트가 실행됩니다.
+
+### 7-5. 자동 실행 + HTTPS 켜기
+
+**VODA만 운영하는 새 서버라면:**
+
+```bash
+cd ~/VODA
+bash deploy/enable-server.sh myclub.duckdns.org
+```
+
+스크립트가 하는 일: `voda` systemd 서비스 생성(부팅 시 자동 시작, `VODA_HTTPS=1`), `/etc/caddy/Caddyfile`을 백업 후 VODA용으로 교체, 서비스 재시작, `/api/health` 확인.
+`sudo` 비밀번호를 물을 수 있습니다. 스크립트 자체를 `sudo`로 실행하지 마세요.
+
+**이미 Caddy로 다른 사이트를 운영 중인 서버라면** (스크립트가 이를 감지하면 덮어쓰지 않고 멈춥니다):
+
+```bash
+cd ~/VODA
+VODA_SKIP_CADDY=1 VODA_PORT=8002 bash deploy/enable-server.sh myclub.duckdns.org
+```
+
+- `VODA_PORT`는 다른 서비스와 겹치지 않는 포트로 정합니다 (`ss -ltnp`로 사용 중인 포트 확인).
+- 스크립트가 출력하는 블록을 `/etc/caddy/Caddyfile` **끝에 추가**한 뒤 적용합니다:
+
+  ```bash
+  sudo nano /etc/caddy/Caddyfile        # 아래 블록 추가
+  #   myclub.duckdns.org {
+  #       reverse_proxy 127.0.0.1:8002
+  #   }
+  sudo caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+  sudo systemctl reload caddy
+  ```
+
+### 7-6. 확인
+
+```bash
+curl -fsS http://127.0.0.1:8000/api/health        # VODA (포트를 바꿨다면 그 포트)
+curl -fsS https://myclub.duckdns.org/api/health   # 외부 HTTPS
+sudo systemctl status voda caddy --no-pager
+```
+
+브라우저에서 `https://myclub.duckdns.org` 와 `https://myclub.duckdns.org/admin` 을 열어 확인합니다.
+인증서 발급에 1~2분 걸릴 수 있습니다.
+
+### 7-7. 코드 업데이트
+
+```bash
+cd ~/VODA
+.venv/bin/python manage.py backup --output ~/voda-backup-$(date +%Y%m%d-%H%M).sqlite3
+git pull --ff-only
+.venv/bin/pip install -r requirements.txt
+sudo systemctl restart voda
+curl -fsS http://127.0.0.1:8000/api/health
+```
+
+### 7-8. 문제 해결
+
+| 증상 | 확인 / 해결 |
+|---|---|
+| `test -x .venv/bin/python` 에서 멈춤 | 7-3의 venv 생성을 안 함 |
+| `test -f data/voda.sqlite3` 에서 멈춤 / `Create an administrator` | 7-4 관리자 계정을 먼저 만들기 |
+| `command -v caddy` 에서 멈춤 | `sudo apt install -y caddy` (패키지가 없으면 [Caddy 공식 설치 안내](https://caddyserver.com/docs/install#debian-ubuntu-raspbian)) |
+| `already serves other sites` | 7-5의 "이미 다른 사이트가 있는 서버" 방법 사용 |
+| HTTPS가 안 열림 | 도메인이 서버 IP를 가리키는지(7-2), 80/443 방화벽, `sudo journalctl -u caddy -n 50 --no-pager` |
+| 502 Bad Gateway | VODA가 꺼짐: `sudo journalctl -u voda -n 50 --no-pager` |
+| 관리자 로그인이 계속 풀림 | `http://`가 아니라 `https://`로 접속 (Secure 쿠키) |
+| 비밀번호 분실 | 서버에서 `cd ~/VODA && .venv/bin/python manage.py create-admin` 후 같은 아이디로 새 비밀번호 |
+
+### 7-9. Claude Code 등 AI 에이전트로 배포할 때
+
+이 README만 보고 에이전트(Claude Code CLI 등)에게 배포를 맡길 수 있습니다. 예시 요청:
+
+> https://github.com/aigtrtr2222/VODA 의 README 7장을 따라 이 서버에 VODA를 배포해줘. 도메인은 `myclub.duckdns.org`.
+
+에이전트가 지켜야 할 규칙:
+
+1. **서버 상태를 먼저 확인**한다: `lsb_release -a`, `ss -ltnp`, `systemctl is-active caddy`, `cat /etc/caddy/Caddyfile`(있다면), `getent hosts <도메인>`과 서버 공인 IP(`curl -s ifconfig.me`) 일치 여부.
+2. 7-3 설치는 직접 실행해도 된다. 이미 `~/VODA`가 있으면 새로 clone하지 말고 7-7 업데이트 절차를 따른다.
+3. **7-4 관리자 계정은 사람이 직접 입력**하게 한다. 비밀번호를 채팅으로 받거나, 명령줄 인자·환경 변수·파일에 쓰지 않는다. (에이전트가 서버에서 직접 돌고 있으면 사용자에게 `! cd ~/VODA && .venv/bin/python manage.py create-admin` 입력을 요청하고, 로컬에서 SSH로 작업 중이면 사용자가 SSH 창에서 직접 실행하게 한다)
+4. Caddyfile에 VODA가 아닌 사이트 블록이 있으면 `VODA_REPLACE_CADDY=1`을 쓰지 말고, `VODA_SKIP_CADDY=1` + 빈 포트로 실행한 뒤 블록을 **추가**한다. 기존 블록은 수정·삭제하지 않는다.
+5. 클라우드 VM 생성, 방화벽 규칙, 고정 IP, DNS 변경처럼 비용이 들거나 외부에 영향을 주는 작업은 사용자 확인 후 진행한다.
+6. `data/` 폴더와 DB를 지우거나 초기화하지 않는다. 업데이트 전에는 반드시 백업한다. `data/`, 백업 파일, `.env`는 커밋하지 않는다.
+7. 끝나면 7-6 확인 명령의 실제 결과(성공/실패)를 그대로 보고하고, 접속 주소와 관리자 주소를 알려준다.
+
+---
+
 ## 개발자용 정보
 
 ### 기능 요약
@@ -138,6 +289,8 @@ Windows 방화벽 허용 창이 뜨면 "개인 네트워크"를 허용하세요.
 | `VODA_PORT` | `8000` | 포트 |
 | `VODA_DATA_DIR` | `./data` | DB 저장 폴더 |
 | `VODA_HTTPS` | `0` | `1`이면 Secure 쿠키 (HTTPS 배포 시) |
+| `VODA_SKIP_CADDY` | `0` | `deploy/enable-server.sh` 전용: `1`이면 Caddy 설정을 건드리지 않음 |
+| `VODA_REPLACE_CADDY` | `0` | `deploy/enable-server.sh` 전용: `1`이면 다른 사이트가 있어도 Caddyfile 교체 |
 
 ### API
 
@@ -168,19 +321,6 @@ Windows 방화벽 허용 창이 뜨면 "개인 네트워크"를 허용하세요.
 ```
 
 Windows는 `test.bat`을 더블클릭해도 됩니다. 테스트는 임시 DB만 사용합니다.
-
-### 인터넷에 공개 배포하기
-
-Ubuntu 24.04 서버에 `git`, `python3-venv`, `python3-pip`, `caddy`를 설치하고 저장소를 받은 뒤:
-
-```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-.venv/bin/python manage.py create-admin
-bash deploy/enable-server.sh your-domain.example
-```
-
-도메인을 서버 IP에 연결하고 방화벽에서 TCP 80/443을 열어 두어야 합니다.
-이 스크립트는 VODA 전용 서버를 가정하고 기존 Caddy 설정을 백업 후 교체합니다. 업데이트 전에는 꼭 `manage.py backup`으로 DB를 백업하세요.
 
 ### 참고
 
